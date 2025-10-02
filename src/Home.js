@@ -1,13 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import packs from "./data/packs";
+import specialPacks from "./data/packs-special";
 
 function Home() {
   const [search, setSearch] = useState("");
   const [selectedSeries, setSelectedSeries] = useState([]);
+  const [mode, setMode] = useState("normal"); // normal | special
   const navigate = useNavigate();
 
-  const seriesList = [...new Set(Object.values(packs).map((p) => p.series))];
+  // 검색어가 있으면 확장팩+스페셜팩 전체 검색
+  const baseData =
+    search.trim() !== ""
+      ? { ...packs, ...specialPacks }
+      : mode === "normal"
+      ? packs
+      : specialPacks;
+
+  const seriesList = [...new Set(Object.values(baseData).map((p) => p.series))];
 
   const toggleSeries = (series) => {
     if (selectedSeries.includes(series)) {
@@ -17,7 +27,7 @@ function Home() {
     }
   };
 
-  const filteredPacks = Object.values(packs).filter((p) => {
+  const filteredPacks = Object.values(baseData).filter((p) => {
     const krName = p.names.kr.replace(/\s+/g, "");
     const searchWord = search.replace(/\s+/g, "");
     const matchesSearch = searchWord === "" || krName.includes(searchWord);
@@ -30,6 +40,7 @@ function Home() {
     <div style={styles.container}>
       <h2 style={styles.title}>Pokeka</h2>
 
+      {/* 검색창 */}
       <input
         type="text"
         placeholder="확장팩검색"
@@ -38,9 +49,34 @@ function Home() {
         style={styles.search}
       />
 
+      {/* 확장팩/스페셜팩 버튼 (검색 없을 때만 보임) */}
+      {search.trim() === "" && (
+        <div style={styles.modeContainer}>
+          <button
+            onClick={() => setMode("normal")}
+            style={{
+              ...styles.modeBtn,
+              backgroundColor: mode === "normal" ? "#e0e0e0" : "#fff"
+            }}
+          >
+            확장팩
+          </button>
+          <button
+            onClick={() => setMode("special")}
+            style={{
+              ...styles.modeBtn,
+              backgroundColor: mode === "special" ? "#e0e0e0" : "#fff"
+            }}
+          >
+            스페셜팩
+          </button>
+        </div>
+      )}
+
+      {/* 시리즈 선택 (검색 없을 때만 표시) */}
       {search.trim() === "" && (
         <div style={styles.seriesContainer}>
-          <h3 style={styles.subTitle}>모든 확장팩</h3>
+          <h3 style={styles.subTitle}>시리즈 선택</h3>
           {seriesList.map((s) => (
             <button
               key={s}
@@ -56,6 +92,7 @@ function Home() {
         </div>
       )}
 
+      {/* 결과 리스트 */}
       <div style={styles.resultContainer}>
         {filteredPacks.length > 0 ? (
           filteredPacks.map((p) => (
@@ -84,16 +121,12 @@ const styles = {
     padding: "30px",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center"   // 전체를 수평 중앙정렬
+    alignItems: "center"
   },
   title: {
     textAlign: "center",
     fontSize: "28px",
     marginBottom: "20px"
-  },
-  subTitle: {
-    marginBottom: "10px",
-    textAlign: "center"
   },
   search: {
     width: "100%",
@@ -103,6 +136,21 @@ const styles = {
     border: "1px solid #ccc",
     display: "block",
     margin: "0 auto 20px"
+  },
+  modeContainer: {
+    marginBottom: "15px",
+    textAlign: "center"
+  },
+  modeBtn: {
+    margin: "5px",
+    padding: "8px 14px",
+    borderRadius: "20px",
+    border: "1px solid #ccc",
+    cursor: "pointer"
+  },
+  subTitle: {
+    marginBottom: "10px",
+    textAlign: "center"
   },
   seriesContainer: {
     marginBottom: "20px",
@@ -119,12 +167,12 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "12px",
-    alignItems: "center",   // 가운데 정렬
+    alignItems: "center",
     width: "100%"
   },
   packBox: {
     width: "100%",
-    maxWidth: "400px",      // 박스 너비 제한
+    maxWidth: "400px",
     background: "#fff",
     borderRadius: "16px",
     padding: "14px",
@@ -139,6 +187,5 @@ const styles = {
     textAlign: "center"
   }
 };
-
 
 export default Home;

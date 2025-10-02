@@ -1,11 +1,15 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import packs from "./data/packs";
+import specialPacks from "./data/packs-special"; // ✅ 스페셜팩 import
 
 function PackDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const pack = packs[id];
+
+  // ✅ packs + specialPacks 합쳐서 조회
+  const allPacks = { ...packs, ...specialPacks };
+  const pack = allPacks[id];
 
   if (!pack) return <p>팩 정보를 찾을 수 없습니다.</p>;
 
@@ -60,9 +64,17 @@ function PackDetail() {
           >
             SNKRDUNK
           </a>
-           <button style={{ ...styles.linkBtn, background: "#eee", color: "#aaa", cursor: "not-allowed" }} disabled>
-    TCGplayer (준비중)
-  </button>
+          <button
+            style={{
+              ...styles.linkBtn,
+              background: "#eee",
+              color: "#aaa",
+              cursor: "not-allowed"
+            }}
+            disabled
+          >
+            TCGplayer (준비중)
+          </button>
         </div>
 
         <button onClick={() => navigate(-1)} style={styles.backBtn}>
@@ -84,7 +96,7 @@ const styles = {
   },
   card: {
     width: "100%",
-    maxWidth: "600px", // 카드 최대 크기
+    maxWidth: "600px",
     background: "#fff",
     borderRadius: "16px",
     padding: "30px",
@@ -120,7 +132,7 @@ const styles = {
     marginBottom: "20px"
   },
   linkBtn: {
-    flex: "1 1 40%", // 버튼 크기 맞춰서 2열 배치
+    flex: "1 1 40%",
     maxWidth: "200px",
     minWidth: "120px",
     padding: "12px 0",
